@@ -60,7 +60,7 @@ def fdc_fdchp_update(ang_rates, angles, n_rec):
 
     Implemented by:
 
-        2014-05-15: Craig Risien. Initial Code
+        2014-05-16: Craig Risien. Initial Code
 
     Usage:
 
@@ -106,7 +106,7 @@ def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
 
     Implemented by:
 
-        2014-05-15: Craig Risien. Initial Code
+        2014-05-16: Craig Risien. Initial Code
 
     Usage:
 
@@ -158,3 +158,45 @@ def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
 
     values = np.vstack((u, v, w))
     return values
+
+
+def fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, dist_vec, n_rec):
+    """
+    Description:
+
+        This function, which comes from the EDDYCORR toolbox,
+        corrects the sonic anemometer components for platform
+        motion and orientation.
+
+    Implemented by:
+
+        2014-05-16: Craig Risien. Initial Code
+
+    Usage:
+
+        [uvw, uvwr, uvwrot] = fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, R, n_rec)
+
+            where
+
+        sonics = row of integers corre to sonic numbers which are to be corrected
+        omegam = (3xN) measured angular rate 'vector' in platform frame
+        euler = (3xN) array of euler angles (phi, theta, psi)
+        uvwplat = (3xN) array of platform velocities
+        dist_vec = (3x1) distance vector between IMU and Sonic sampling volume
+        n_rec = number of records. If the FDCHP is sampling at
+                10Hz for 20 min, n_rec should equal 12000.
+
+
+    References:
+
+        OOI (2014). Data Product Specification for FDCHP Data Products. Document
+            Control Number 1341-00280. https://alfresco.oceanobservatories.org/
+            (See: Company Home >> OOI >> Controlled >> 1000 System Level >>
+            1341-00280_Data_Product_Spec_FDCHP_OOI.pdf)
+    """
+
+    Rvec = np.tile(dist_vec, n_rec)
+    uvwrot = np.cross(omegam, Rvec)
+
+    uvwr = fdc_fdchp_trans(sonics + uvwrot, euler, n_rec, True)
+    uvw = uvwr + uvwplat
