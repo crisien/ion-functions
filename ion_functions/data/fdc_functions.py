@@ -7,6 +7,7 @@
 """
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 
 def fdc_fdchp_grv(lat):
@@ -200,3 +201,41 @@ def fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, dist_vec, n_rec):
 
     uvwr = fdc_fdchp_trans(sonics + uvwrot, euler, n_rec, True)
     uvw = uvwr + uvwplat
+
+
+def fdc_fdchp_despikesimple(data):
+    """
+    Description:
+
+        Function to remove outliers.
+
+    Implemented by:
+
+        2014-05-19: Craig Risien. Initial Code
+
+    Usage:
+
+        [data] = fdc_fdchp_despikesimple(data)
+
+            where
+
+        data = (3xN) array of data values
+
+
+    References:
+
+        OOI (2014). Data Product Specification for FDCHP Data Products. Document
+            Control Number 1341-00280. https://alfresco.oceanobservatories.org/
+            (See: Company Home >> OOI >> Controlled >> 1000 System Level >>
+            1341-00280_Data_Product_Spec_FDCHP_OOI.pdf)
+    """
+
+    array_size = np.shape(data)
+    t = np.arange(0, array_size[1])
+
+    for i in range(0, array_size[0]):
+        M = np.median(data[i, :])
+        S = np.std(data[i, :])
+        ind = np.logical_and(data[i, :] < M + 6 * S, data[i, :] > M - 6 * S)
+        f = interp1d(t[ind], data[i, ind], kind='nearest')
+        data[i, :] = f(t)
