@@ -414,6 +414,8 @@ def fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, dist_vec, n_rec):
     uvwr = fdc_fdchp_trans(sonics + uvwrot, euler, True)
     uvw = uvwr + uvwplat
 
+    return uvw, uvwr, uvwrot
+
 
 def fdc_fdchp_despikesimple(data):
     """
@@ -450,6 +452,8 @@ def fdc_fdchp_despikesimple(data):
         ind = np.logical_and(data[i, :] < M + 6 * S, data[i, :] > M - 6 * S)
         f = sp.interpolate.interp1d(t[ind], data[i, ind], kind='nearest')
         data[i, :] = f(t)
+
+    return data
 
 
 def fdc_fdchp_flux(sonicU, sonicV, sonicW, sonicT, heading, roll, pitch,
