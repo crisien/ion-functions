@@ -268,7 +268,7 @@ def fdc_fdchp_anglesclimodeyaw(ahi, bhi, sf, accm, ratem, gyro, its, goodcompass
     return euler, dr
 
 
-def fdc_fdchp_update(ang_rates, angles, n_rec):
+def fdc_fdchp_update(ang_rates, angles):
     """
     Description:
 
@@ -282,15 +282,13 @@ def fdc_fdchp_update(ang_rates, angles, n_rec):
 
     Usage:
 
-        values = fdc_fdchp_update(ang_rates, angles, n_rec)
+        values = fdc_fdchp_update(ang_rates, angles)
 
             where
 
         values = output matrix of values
         ang_rates = (3xN) array of angular rates.
         angles = (3xN) array of Euler angles phi,theta,psi.
-        n_rec = number of records. If the FDCHP is sampling at
-                10Hz for 20 min, n_rec should equal 12000.
 
     References:
 
@@ -300,13 +298,13 @@ def fdc_fdchp_update(ang_rates, angles, n_rec):
             1341-00280_Data_Product_Spec_FDCHP_OOI.pdf)
     """
 
-    p = ang_rates[0, 0:n_rec]
-    t = ang_rates[1, 0:n_rec]
-    ps = ang_rates[2, 0:n_rec]
+    p = ang_rates[0, :]
+    t = ang_rates[1, :]
+    ps = ang_rates[2, :]
 
-    up = angles[0, 0:n_rec]
-    vp = angles[1, 0:n_rec]
-    wp = angles[2, 0:n_rec]
+    up = angles[0, :]
+    vp = angles[1, :]
+    wp = angles[2, :]
 
     u = up + vp * np.sin(p) * np.tan(t) + wp * np.cos(p) * np.tan(t)
     v = 0 + vp * np.cos(p) - wp * np.sin(p)
@@ -316,7 +314,7 @@ def fdc_fdchp_update(ang_rates, angles, n_rec):
     return values
 
 
-def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
+def fdc_fdchp_trans(ang_rates, angles, iflag=True):
     """
     Description:
 
@@ -328,7 +326,7 @@ def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
 
     Usage:
 
-        values = fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True)
+        values = fdc_fdchp_trans(ang_rates, angles, iflag=True)
 
             where
 
@@ -336,8 +334,6 @@ def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
         ang_rates = (3xN) array of angular rates.
         angles = (3xN) array of Euler angles phi,theta,psi.
         iflag = True
-        n_rec = number of records. If the FDCHP is sampling at
-                10Hz for 20 min, n_rec should equal 12000.
 
     References:
 
@@ -347,13 +343,13 @@ def fdc_fdchp_trans(ang_rates, angles, n_rec, iflag=True):
             1341-00280_Data_Product_Spec_FDCHP_OOI.pdf)
     """
 
-    p = ang_rates[0, 0:n_rec]
-    t = ang_rates[1, 0:n_rec]
-    ps = ang_rates[2, 0:n_rec]
+    p = ang_rates[0, :]
+    t = ang_rates[1, :]
+    ps = ang_rates[2, :]
 
-    up = angles[0, 0:n_rec]
-    vp = angles[1, 0:n_rec]
-    wp = angles[2, 0:n_rec]
+    up = angles[0, :]
+    vp = angles[1, :]
+    wp = angles[2, :]
 
     if iflag:
         u = (up * np.cos(t) * np.cos(ps) + vp * (np.sin(p) * np.sin(t) *
@@ -404,7 +400,6 @@ def fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, dist_vec, n_rec):
         n_rec = number of records. If the FDCHP is sampling at
                 10Hz for 20 min, n_rec should equal 12000.
 
-
     References:
 
         OOI (2014). Data Product Specification for FDCHP Data Products. Document
@@ -416,7 +411,7 @@ def fdc_fdchp_sonic(sonics, omegam, euler, uvwplat, dist_vec, n_rec):
     Rvec = np.tile(dist_vec, n_rec)
     uvwrot = np.cross(omegam, Rvec)
 
-    uvwr = fdc_fdchp_trans(sonics + uvwrot, euler, n_rec, True)
+    uvwr = fdc_fdchp_trans(sonics + uvwrot, euler, True)
     uvw = uvwr + uvwplat
 
 
@@ -437,7 +432,6 @@ def fdc_fdchp_despikesimple(data):
             where
 
         data = (3xN) array of data values
-
 
     References:
 
